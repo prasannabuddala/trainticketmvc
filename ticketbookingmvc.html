@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="ISO-8859-1">
+<title>Insert title here</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<style>
+/* Resetting default browser styles */
+body, html {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+}
+
+/* Centering container */
+#container {
+    width: 80%;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Styling headings */
+h2 {
+    text-align: center;
+    color: #333;
+}
+
+/* Styling form elements */
+label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+input[type="date"],
+select {
+    width: 400px;
+    padding: 8px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    margin-bottom: 10px;
+}
+button {
+    padding: 10px 20px;
+    background-color: grey;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: black;
+}
+
+/* Styling form layout */
+#from-to, #third {
+    margin-bottom: 20px;
+    width: 100%;
+    max-width: 400px; /* Adjust max-width as needed */
+}
+
+#from-to select {
+    width: 100%;
+}
+/* Styling the table */
+table {
+    width: 50%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+/* Styling table headers */
+th {
+    background-color: black;
+    color: #fff;
+    padding: 8px;
+    text-align: left;
+}
+
+/* Styling table data cells */
+td {
+    padding: 8px;
+    border-bottom: 1px solid #ccc;
+}
+
+/* Styling alternate rows */
+td.icon:hover{
+cursor:pointer;
+}
+/* Styling input fields within table */
+input[type="text"],
+input[type="number"],
+select {
+    width: 400px;
+    padding: 8px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+/* Styling button */
+#addP {
+    padding: 10px 20px;
+    background-color: grey;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-bottom: 20px;
+}
+td input[type="number"]{
+width: 100px;
+}
+td input[type="text"]{
+width:350px;
+}
+td select{
+width:100px;
+}
+#addP:hover {
+    background-color: black;
+}
+
+/* Responsive layout */
+@media (max-width: 768px) {
+    #container {
+        width: 90%; /* Adjust width as needed */
+    }
+}
+
+
+</style>
+</head>
+<body>
+	<br />
+	<br />
+	<br />
+	<br />
+	<div id="container">
+		<h2>Train Ticket Booking</h2>
+		<br>
+		<div id="first">
+			<div class="from-to">
+				<label for="from">From: </label> <select name="from-stations"
+					id="from" required>
+				</select>
+			</div>
+			<div class="from-to">
+				<label for="to">To: </label> <select name="to-stations" id="to"
+					required></select>
+			</div>
+			<div>
+				<button id="searcht">search</button>
+			</div>
+		</div>
+		<br />
+		<div id="second">
+			<label for="trains">Trains list: </label>
+				<select name="trains" id="trains"></select>
+		</div>
+		<div id="third">
+			<div>
+				<label for="date">Choose date: </label>
+				<input type="date" id="date" required>
+			</div>
+			<div>
+				<label for="tclass">Class: </label>
+				<select name="tclass" id="tclass" required>
+					<option value="General">General</option>
+					<option value="secondclass">Second class</option>
+					<option value="tier-1">Ac-tire1</option>
+					<option value="tier-2">Ac-tire2</option>
+					<option value="tier-3">Ac-tire3</option>
+				</select>
+			</div>
+		</div>
+		<button id="bookTkt">book ticket</button>
+		<h3>Passengers:</h3>
+		<table id="passengers">
+		<tr><th>s.no</th><th>name</th><th>gender</th><th>age</th></tr>
+		<tr id="tr1">
+			<td>1</td>
+			<td><input type="text"></td>
+			<td><select name="gender"><option value="male">male</option><option value="female">female</option></select></td>
+			<td><input type="number"></td>
+			<td class="icon"><i class="fa fa-close"></i></td>
+		</tr>
+		</table>
+		<br />
+		<button id="addP">add</button>
+	</div>
+</body>
+<script>
+$(document).ready(function(){
+	$.ajax({
+		url:"/ticketbookingmvc/GetStationsController",
+		method:"GET",
+		success: function(data){
+			//console.log(data);
+			$.each(data,function(ind,stationObj){
+				//console.log(stationObj.st_name);
+				$("<option>",{
+					value:stationObj.st_name,
+					text:stationObj.st_name
+				}).appendTo("#from,#to");
+			})
+		},
+		error: function(xhr, status, error){
+			console.log("errorr",error);
+		}
+	})
+	$("#searcht").click(function(){
+		$("#trains").empty();
+		let from = $("#from").val();
+		let to = $("#to").val();
+		let inputData = {
+				fromm:from,
+				too:to
+		};
+		$.ajax({
+			url:"/ticketbookingmvc/GetTrainsController",
+			method:"Get",
+			data: inputData,
+			success: function(data){
+				if(data.length==0) $("<option>").text("no train in this route").appendTo("#trains");
+				else
+				$.each(data,function(index,trainObj){
+					console.log(trainObj.trname);
+					$("<option>",{
+						value:trainObj.trname,
+						text:trainObj.trname,
+					}).appendTo("#trains");
+				})
+				
+			},
+			error: function(a,b,c){
+				console.log("Error",c);
+			}
+		})
+		
+	})
+	$("#addP").click(function(){
+		let trs = $("tr");
+		let trCount = trs.length-1;
+		//console.log(trCount);
+		if(trCount < 6){
+			let newRow = `<tr id="tr${trCount+1}"><td>${trCount+1}</td><td><input type="text"></td>
+			<td><select name="gender"><option value="male">male</option><option value="female">female</option></select></td>
+			<td><input type="number"></td><td class="icon"><i class="fa fa-close"></i></td></tr>`;
+			$("table").append(newRow);
+		}
+		else{
+			alert("sorry! maximum 6 passengers only:(");
+		}
+	})
+	$("table").on("click","tr", function() {
+        $(this).remove();
+    });
+	$("#bookTkt").click(function(){
+		
+	})
+})
+</script>
+</html>
